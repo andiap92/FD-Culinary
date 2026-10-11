@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Katalog minuman artisan dan kue FD Culinary." />
+    <meta name="theme-color" content="#f8f1e7" />
+    <title>FD Culinary — Good Drinks, Good Mood</title>
+    <link rel="stylesheet" href="/src/css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header" id="home">
+      <nav class="navbar" aria-label="Navigasi utama">
+        <a class="brand" href="#home" aria-label="FD Culinary beranda">
+          <img src="/assets/images/figma/32fe221a3583db74ff472de1add2819f521ee67d.png" alt="Logo FD Culinary" />
+          <span>FD Culinary</span>
+        </a>
+
+        <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-expanded="false" aria-controls="navPanel" aria-label="Buka menu">
+          <span></span><span></span><span></span>
+        </button>
+
+        <div class="nav-panel" id="navPanel">
+          <div class="nav-links">
+            <a href="#home">Beranda</a>
+            <a href="#catalog">Menu</a>
+            <a href="#story">Cerita Kami</a>
+            <a href="#reviews">Review</a>
+          </div>
+
+          <label class="nav-search" for="searchInput">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.2-4.2m2.2-5.3a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" /></svg>
+            <input id="searchInput" type="search" placeholder="Cari menu..." autocomplete="off" />
+          </label>
+
+          <button class="cart-icon-button" id="cartButton" type="button" data-open-cart aria-label="Buka keranjang, 0 produk">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.1 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 1.9-1.4L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/></svg>
+            <span class="cart-count" id="cartCount" aria-live="polite">0</span>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="heroTitle">
+        <div class="hero-inner">
+          <div class="hero-visual">
+            <div class="hero-product-stage">
+              <img class="hero-banner" src="/assets/images/home-banner.jpg" alt="Tiga botol minuman FD Drinks" />
+            </div>
+          </div>
+
+          <div class="hero-copy">
+            <p class="eyebrow">Signature drinks · dibuat fresh</p>
+            <h1 id="heroTitle">Nikmati rasa favoritmu dalam setiap botol.</h1>
+            <p class="hero-description">Minuman artisan dengan rasa yang lembut, seimbang, dan dibuat untuk menemani setiap momen harimu.</p>
+            <p class="hero-price">Mulai <strong>Rp16.000</strong></p>
+            <div class="hero-actions">
+              <a class="button button-dark" href="#catalog">Lihat menu</a>
+              <button class="button button-outline" type="button" data-open-cart>Lihat keranjang</button>
+            </div>
+          </div>
+        </div>
+        <a class="scroll-cue" href="#story">Scroll untuk menjelajah <span>↓</span></a>
+      </section>
+
+      <section class="story section reveal" id="story">
+        <div class="section-inner story-grid">
+          <div class="story-image interactive-image">
+            <!-- <img src="" alt="Roasted Jasmine Milk Tea FD Drinks dengan bunga jasmine" /> -->
+            <span class="floating-tag">Dibuat fresh setiap hari</span>
+          </div>
+          <div class="story-copy">
+            <p class="eyebrow">Tentang setiap botol</p>
+            <h2>Diracik dengan rasa yang familiar, dibuat lebih istimewa.</h2>
+            <p>FD Culinary menghadirkan minuman artisan untuk momen sederhana yang terasa menyenangkan. Bahan pilihan, rasa seimbang, dan kemasan praktis—siap menemani harimu.</p>
+            <div class="feature-list">
+              <article><span>01</span><div><h3>Real ingredients</h3><p>Teh, kopi, susu, dan bahan berkualitas.</p></div></article>
+              <article><span>02</span><div><h3>Freshly made</h3><p>Diracik dalam batch kecil untuk menjaga rasa.</p></div></article>
+              <article><span>03</span><div><h3>Just right</h3><p>Manis yang pas dan pilihan rasa variatif.</p></div></article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="catalog section reveal" id="catalog">
+        <div class="section-inner">
+          <div class="section-heading catalog-heading">
+            <div>
+              <p class="eyebrow">Pilih favoritmu</p>
+              <h2>Menu signature</h2>
+              <p>Pilih ukuran dan lihat harga. Pemesanan dilanjutkan langsung bersama owner melalui WhatsApp.</p>
+            </div>
+            <div class="catalog-menu-actions">
+              <div class="category-tabs" role="tablist" aria-label="Jenis minuman">
+                <button class="category-button active" type="button" role="tab" aria-selected="true" data-product-family="Milk &amp; Tea Based">Milk &amp; Tea</button>
+                <button class="category-button" type="button" role="tab" aria-selected="false" data-product-family="Coffee Based">Coffee</button>
+              </div>
+            </div>
+          </div>
+          <p class="catalog-result" id="catalogResult" aria-live="polite"></p>
+          <div class="product-grid" id="productGrid"></div>
+        </div>
+      </section>
+
+      <section class="video-section section reveal" id="video-review" data-review-category="drink">
+        <div class="section-inner video-grid">
+          <div class="video-copy">
+            <p class="eyebrow">Taste it. Love it.</p>
+            <h2>Apa kata mereka tentang kami?</h2>
+            <p>Review jujur dari konstumer kami yang sudah mencoba minuman dalam aktivitas sehari-hari mereka</p>
+            <ul>
+              <li>Kualitas Kesegaran</li>
+              <li>Otentikasi Rasa</li>
+              <li>Travel friendly untuk setiap momen</li>
+            </ul>
+          </div>
+          <div class="video-frame interactive-image">
+            <video id="reviewVideo" preload="metadata" poster="/assets/images/figma/poster.png" aria-label="Video review FD Drinks"></video>
+            <div class="video-placeholder" id="videoPlaceholder">
+              <span class="play-icon">▶</span>
+              <strong>Slot video review</strong>
+              <small>Tambahkan sumber video melalui konfigurasi.</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="reviews section reveal" id="reviews">
+        <div class="section-inner">
+          <div class="section-heading centered-heading">
+            <p class="eyebrow">Kata mereka</p>
+            <h2 id="reviewsTitle">Review Minuman dari pelanggan kami.</h2>
+          </div>
+          <div class="review-shell">
+            <button class="round-button review-arrow" id="reviewPrevious" type="button" aria-label="Review sebelumnya">←</button>
+            <article class="review-card" id="reviewCard" aria-live="polite"></article>
+            <button class="round-button review-arrow" id="reviewNext" type="button" aria-label="Review berikutnya">→</button>
+          </div>
+          <div class="review-progress" id="reviewProgress"></div>
+        </div>
+      </section>
+
+      <section class="cta section reveal">
+        <div class="section-inner cta-card">
+          <div>
+            <p class="eyebrow">Good drinks, good mood</p>
+            <h2>Setiap Rasa Punya Cerita, Setiap Tegukan Punya Makna</h2>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="section-inner footer-grid">
+        <div class="footer-brand">
+          <img src="/assets/images/figma/32fe221a3583db74ff472de1add2819f521ee67d.png" alt="" />
+          <div><strong>FD Culinary</strong><p>Freshly Crafted Beverages</p></div>
+        </div>
+        <div class="footer-contact">
+          <strong>Hubungi kami:</strong>
+          <div class="footer-social-links">
+            <a class="footer-social-link" href="https://www.instagram.com/fdculinary__?utm_source=ig_web_button_share_sheet&amp;obrf=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" aria-label="Instagram FD Culinary">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.6" cy="6.6" r=".8" class="icon-fill"/></svg>
+            </a>
+            <a class="footer-social-link" id="footerWhatsapp" href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp owner FD Culinary">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 11.7a8.2 8.2 0 0 1-12.1 7.2l-4 1 1.1-3.9a8.2 8.2 0 1 1 15-4.3Z"/><path d="M8.5 7.7c.2-.5.4-.5.7-.5h.5c.2 0 .4 0 .5.4l.8 1.8c.1.3.1.5-.1.7l-.6.7c-.2.2-.2.4 0 .7.2.4.8 1.3 1.7 2s1.7 1.3 2.1 1.5c.3.2.5.2.7-.1l.9-1.1c.2-.2.4-.3.7-.2l1.7.8c.3.2.5.2.5.4 0 .2-.1 1.1-.7 1.5-.5.5-1.2.7-1.9.6-.7-.1-2.6-.7-4.4-2.3-1.4-1.3-2.4-2.9-2.7-3.6-.3-.7-.3-1.4.1-2.2Z"/></svg>
+            </a>
+          </div>
+        </div>
+        <p>© <span id="currentYear"></span> FD Culinary.</p>
+      </div>
+    </footer>
+
+    <dialog class="workflow-dialog add-cart-dialog" id="addCartDialog" aria-labelledby="addCartTitle">
+      <div class="workflow-dialog-header">
+        <div><p class="eyebrow">Pilihanmu tersimpan</p><h2 id="addCartTitle">Berhasil masuk keranjang</h2></div>
+        <button class="icon-button dialog-close" id="addCartClose" type="button" aria-label="Tutup pemberitahuan">×</button>
+      </div>
+      <div class="add-cart-confirmation">
+        <span class="add-cart-check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.3 4.3L19 7.4"/></svg></span>
+        <strong id="addedProductName">Produk berhasil ditambahkan</strong>
+        <p id="addedProductDetails"></p>
+      </div>
+      <div class="add-cart-dialog-actions">
+        <button class="button button-dark" id="continueAfterAdd" type="button">Lanjut belanja</button>
+      </div>
+    </dialog>
+
+    <dialog class="workflow-dialog cart-dialog" id="cartDialog" aria-labelledby="cartTitle">
+      <div class="workflow-dialog-header">
+        <div><p class="eyebrow">Pesananmu</p><h2 id="cartTitle">Keranjang</h2></div>
+        <button class="icon-button dialog-close" id="cartClose" type="button" aria-label="Tutup keranjang">×</button>
+      </div>
+      <div class="cart-empty" id="cartEmpty">
+        <strong>Keranjang masih kosong.</strong>
+        <p>Tambahkan minuman dari katalog untuk membuat invoice.</p>
+      </div>
+      <div class="cart-items" id="cartItems" aria-live="polite"></div>
+      <div class="cart-summary" id="cartSummary" hidden>
+        <span>Subtotal pesanan</span><strong id="cartTotal">Rp0</strong>
+      </div>
+      <div class="cart-dialog-actions">
+        <button class="button button-outline" id="continueShopping" type="button">Lanjut pilih produk</button>
+        <button class="button button-dark" id="createDraftInvoice" type="button" disabled>Buat draft invoice</button>
+      </div>
+    </dialog>
+
+    <dialog class="workflow-dialog invoice-dialog" id="invoiceDialog" aria-labelledby="invoiceDialogTitle">
+      <div class="workflow-dialog-header">
+        <div><p class="eyebrow">Konfirmasi pesanan</p><h2 id="invoiceDialogTitle">Periksa invoice</h2></div>
+        <button class="icon-button dialog-close" id="invoiceClose" type="button" aria-label="Tutup invoice">×</button>
+      </div>
+      <div class="invoice-preview-frame"><img id="invoicePreview" alt="Pratinjau Draft Invoice FD Culinary" /></div>
+      <div id="invoiceDraftStage">
+        <p class="invoice-instruction">Pastikan produk, ukuran, jumlah, dan harga sudah benar. Invoice masih berstatus <strong>Draft Invoice</strong> sampai kamu mengonfirmasi.</p>
+        <div class="invoice-dialog-actions">
+          <button class="button button-outline" id="backToCart" type="button">Ubah pesanan</button>
+          <button class="button button-dark" id="confirmInvoice" type="button">Konfirmasi &amp; download PNG</button>
+        </div>
+        <p class="invoice-error" id="invoiceError" role="alert" hidden></p>
+      </div>
+      <div class="invoice-success" id="invoiceSuccess" hidden>
+        <strong>Invoice final berhasil diunduh.</strong>
+        <p id="invoiceNumberNotice"></p>
+        <ol>
+          <li>Buka WhatsApp melalui tombol di bawah.</li>
+          <li>Lampirkan PNG invoice yang baru diunduh ke chat.</li>
+          <li>Kirim pesan kepada owner untuk konfirmasi pesanan dan pembayaran.</li>
+        </ol>
+        <button class="button button-dark" id="continueToWhatsapp" type="button">Lanjut ke WhatsApp</button>
+      </div>
+    </dialog>
+
+    <script type="module" src="/src/js/app.js"></script>
+  </body>
+</html>
