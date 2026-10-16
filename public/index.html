@@ -87,9 +87,8 @@
         <div class="section-inner">
           <div class="section-heading catalog-heading">
             <div>
-              <p class="eyebrow">Pilih favoritmu</p>
-              <h2>Menu signature</h2>
-              <p>Pilih ukuran, atur jumlah, lalu masukkan ke keranjang.</p>
+              <h2>Pilih minuman favoritmu</h2>
+              <p>Diracik fresh, siap menemani harimu.</p>
             </div>
             <div class="catalog-menu-actions">
               <div class="category-tabs" role="tablist" aria-label="Jenis minuman">
@@ -102,6 +101,16 @@
           <div class="product-grid" id="productGrid"></div>
         </div>
       </section>
+
+      <aside class="sticky-cart" id="stickyCartBar" aria-label="Ringkasan keranjang" hidden>
+        <div class="sticky-cart-summary">
+          <span class="sticky-cart-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M3 4h2l2.1 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 1.9-1.4L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/></svg>
+          </span>
+          <strong id="stickyCartSummary" aria-live="polite">0 item · Rp0</strong>
+        </div>
+        <button class="button button-dark sticky-cart-button" id="stickyCartOpen" type="button">Lihat keranjang <span aria-hidden="true">→</span></button>
+      </aside>
 
       <section class="video-section section reveal" id="video-review" data-review-category="drink">
         <div class="section-inner video-grid">
@@ -171,22 +180,6 @@
         <p>© <span id="currentYear"></span> FD Culinary.</p>
       </div>
     </footer>
-
-    <dialog class="workflow-dialog add-cart-dialog" id="addCartDialog" aria-labelledby="addCartTitle">
-      <div class="workflow-dialog-header">
-        <div><p class="eyebrow">Pilihanmu tersimpan</p><h2 id="addCartTitle">Berhasil masuk keranjang</h2></div>
-        <button class="icon-button dialog-close" id="addCartClose" type="button" aria-label="Tutup pemberitahuan">×</button>
-      </div>
-      <div class="add-cart-confirmation">
-        <span class="add-cart-check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.3 4.3L19 7.4"/></svg></span>
-        <strong id="addedProductName">Produk berhasil ditambahkan</strong>
-        <p id="addedProductDetails"></p>
-      </div>
-      <div class="add-cart-dialog-actions">
-        <button class="button button-outline" id="continueAfterAdd" type="button">Lanjut belanja</button>
-        <button class="button button-dark" id="viewCartAfterAdd" type="button">Lihat keranjang</button>
-      </div>
-    </dialog>
 
     <dialog class="workflow-dialog cart-dialog" id="cartDialog" aria-labelledby="cartTitle">
       <div class="workflow-dialog-header">

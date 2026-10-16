@@ -30,15 +30,12 @@ const elements = {
   mobileMenuButton: document.querySelector("#mobileMenuButton"),
   navPanel: document.querySelector("#navPanel"),
   footerWhatsapp: document.querySelector("#footerWhatsapp"),
-  addCartDialog: document.querySelector("#addCartDialog"),
-  addCartClose: document.querySelector("#addCartClose"),
-  addedProductName: document.querySelector("#addedProductName"),
-  addedProductDetails: document.querySelector("#addedProductDetails"),
-  continueAfterAdd: document.querySelector("#continueAfterAdd"),
-  viewCartAfterAdd: document.querySelector("#viewCartAfterAdd"),
   openCartButtons: [...document.querySelectorAll("[data-open-cart]")],
   cartButton: document.querySelector("#cartButton"),
   cartCount: document.querySelector("#cartCount"),
+  stickyCartBar: document.querySelector("#stickyCartBar"),
+  stickyCartSummary: document.querySelector("#stickyCartSummary"),
+  stickyCartOpen: document.querySelector("#stickyCartOpen"),
   cartDialog: document.querySelector("#cartDialog"),
   cartClose: document.querySelector("#cartClose"),
   cartEmpty: document.querySelector("#cartEmpty"),
@@ -105,23 +102,6 @@ function createSizeSelector(product, selectedSize) {
     </div>`;
 }
 
-/** Adds the currently selected drink option to the in-memory cart. */
-function addToCart(productId) {
-  const product = catalogItems.find((item) => item.id === productId);
-  if (!product || product.category !== "drink") return;
-  const option = getProductOption(product);
-  const key = `${product.id}:${option.sizeKey}`;
-  const current = state.cart.get(key);
-  state.cart.set(key, {
-    key,
-    productId: product.id,
-    sizeKey: option.sizeKey,
-    quantity: (current?.quantity ?? 0) + 1
-  });
-  renderCart();
-  renderProducts();
-}
-
 /** Changes the selected size's quantity directly from a product card. */
 function changeProductQuantity(productId, delta) {
   const product = catalogItems.find((item) => item.id === productId);
@@ -153,6 +133,8 @@ function renderCart() {
   const total = entries.reduce((sum, item) => sum + item.lineTotal, 0);
   elements.cartCount.textContent = String(itemCount);
   elements.cartButton.setAttribute("aria-label", `Buka keranjang, ${itemCount} produk`);
+  elements.stickyCartBar.hidden = itemCount === 0;
+  elements.stickyCartSummary.textContent = `${itemCount} item · ${formatCurrency(total)}`;
   elements.cartEmpty.hidden = entries.length > 0;
   elements.cartItems.innerHTML = entries.map((item) => `
     <article class="cart-item" data-cart-item="${item.key}">
@@ -177,16 +159,6 @@ function renderCart() {
 function openCartDialog() {
   renderCart();
   elements.cartDialog.showModal();
-}
-
-/** Shows a styled confirmation after a catalog product enters the cart. */
-function showAddCartConfirmation(productId) {
-  const product = catalogItems.find((item) => item.id === productId);
-  if (!product) return;
-  const option = getProductOption(product);
-  elements.addedProductName.textContent = product.name;
-  elements.addedProductDetails.textContent = `${option.sizeLabel} · ${formatCurrency(option.price)} per botol`;
-  elements.addCartDialog.showModal();
 }
 
 /** Updates or removes a cart line from the cart dialog. */
@@ -442,42 +414,29 @@ function getVisibleProducts() {
 
 /** Creates semantic card markup for one catalog item. */
 function createProductCard(product, index) {
-  const isDrink = product.category === "drink";
   const option = getProductOption(product);
-  const sizeSelector = isDrink ? createSizeSelector(product, option.sizeKey) : "";
+  const sizeSelector = createSizeSelector(product, option.sizeKey);
   const cartEntry = state.cart.get(`${product.id}:${option.sizeKey}`);
   const quantity = cartEntry?.quantity ?? 0;
   return `
     <article class="product-card reveal-card" data-product-card="${product.id}" style="--delay: ${index * 55}ms">
       <div class="product-image interactive-image${option.sizeKey === drinkSizes[1].key ? " is-liter" : ""}">
         <img src="${product.image}" alt="${product.name}, ${option.sizeLabel}" loading="lazy" />
-        <span class="product-family">${product.family}</span>
       </div>
       <div class="product-content">
-        <div class="product-title-row">
-          <h3>${product.name}</h3>
-          <span class="product-size-label">${option.sizeLabel}</span>
-        </div>
+        <h3>${product.name}</h3>
         <p>${product.description}</p>
-        <div class="product-footer">
-          <strong>${formatCurrency(option.price)}</strong>
-          <div class="product-actions">
-            ${sizeSelector}
-            ${isDrink ? `
-              <div class="product-quantity" aria-label="Jumlah ${product.name} ${option.sizeLabel}">
-                <button type="button" data-product-quantity="${product.id}" data-delta="-1" aria-label="Kurangi ${product.name}" ${quantity === 0 ? "disabled" : ""}>−</button>
-                <output aria-live="polite">${quantity}</output>
-                <button type="button" data-product-quantity="${product.id}" data-delta="1" aria-label="Tambah ${product.name}">+</button>
-              </div>
-              <button
-                class="add-to-cart-button"
-                type="button"
-                data-add-to-cart="${product.id}"
-                aria-label="Tambah ${product.name}, ukuran ${option.sizeLabel}, ke keranjang"
-                title="Tambah ke keranjang"
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-              </button>` : ""}
+        <div class="product-size-row">
+          <span>Ukuran</span>
+          ${sizeSelector}
+        </div>
+        <strong class="product-price">${formatCurrency(option.price)}</strong>
+        <div class="product-quantity-row">
+          <span>Jumlah</span>
+          <div class="product-quantity" aria-label="Jumlah ${product.name} ${option.sizeLabel}">
+            <button type="button" data-product-quantity="${product.id}" data-delta="-1" aria-label="Kurangi ${product.name}" ${quantity === 0 ? "disabled" : ""}>−</button>
+            <output aria-live="polite">${quantity}</output>
+            <button type="button" data-product-quantity="${product.id}" data-delta="1" aria-label="Tambah ${product.name}">+</button>
           </div>
         </div>
       </div>
@@ -524,12 +483,6 @@ function handleProductGridClick(event) {
     changeProductQuantity(quantityButton.dataset.productQuantity, Number(quantityButton.dataset.delta));
     return;
   }
-  const addButton = event.target.closest("[data-add-to-cart]");
-  if (addButton) {
-    addToCart(addButton.dataset.addToCart);
-    showAddCartConfirmation(addButton.dataset.addToCart);
-    return;
-  }
   const sizeButton = event.target.closest("[data-size-option]");
   if (!sizeButton) return;
 
@@ -545,15 +498,10 @@ function handleProductGridClick(event) {
 
   card.querySelector(".product-image").classList.toggle("is-liter", selectedSize === drinkSizes[1].key);
   card.querySelector(".product-image img").alt = `${product.name}, ${option.sizeLabel}`;
-  card.querySelector(".product-size-label").textContent = option.sizeLabel;
-  card.querySelector(".product-footer > strong").textContent = formatCurrency(option.price);
+  card.querySelector(".product-price").textContent = formatCurrency(option.price);
   const selectedEntry = state.cart.get(`${product.id}:${option.sizeKey}`);
   card.querySelector(".product-quantity output").textContent = String(selectedEntry?.quantity ?? 0);
   card.querySelector('[data-product-quantity][data-delta="-1"]').disabled = !selectedEntry;
-  card.querySelector("[data-add-to-cart]").setAttribute(
-    "aria-label",
-    `Tambah ${product.name}, ukuran ${option.sizeLabel}, ke keranjang`
-  );
   card.querySelectorAll("[data-size-option]").forEach((button) => {
     const isSelected = button.dataset.sizeValue === selectedSize;
     button.classList.toggle("is-selected", isSelected);
@@ -696,18 +644,7 @@ function bindEvents() {
   elements.openCartButtons.forEach((button) => button.addEventListener("click", openCartDialog));
   elements.cartItems.addEventListener("click", handleCartItemsClick);
   elements.cartClose.addEventListener("click", () => elements.cartDialog.close());
-  elements.addCartClose.addEventListener("click", () => elements.addCartDialog.close());
-  elements.continueAfterAdd.addEventListener("click", () => {
-    elements.addCartDialog.close();
-    document.querySelector("#catalog").scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-  elements.viewCartAfterAdd.addEventListener("click", () => {
-    elements.addCartDialog.close();
-    openCartDialog();
-  });
-  elements.addCartDialog.addEventListener("click", (event) => {
-    if (event.target === elements.addCartDialog) elements.addCartDialog.close();
-  });
+  elements.stickyCartOpen.addEventListener("click", openCartDialog);
   elements.continueShopping.addEventListener("click", () => {
     elements.cartDialog.close();
     document.querySelector("#catalog").scrollIntoView({ behavior: "smooth", block: "start" });

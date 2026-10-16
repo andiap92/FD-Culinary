@@ -18,9 +18,10 @@ flowchart TD
     DATA --> C[Katalog dan konten ditampilkan]
     C --> F[Pengunjung memilih kategori/keluarga produk atau mencari]
     F --> P[Daftar produk diperbarui di browser]
-    P --> A{Produk minuman ditambahkan?}
-    A -->|Ya| CART[Keranjang sementara di memori browser]
-    CART --> EDIT[Ubah jumlah, hapus item, lihat subtotal]
+    P --> A[Pilih ukuran dan atur jumlah dengan kontrol − / +]
+    A --> CART[Keranjang sementara di memori browser]
+    CART --> BAR[Ringkasan jumlah dan total tampil di bar bawah]
+    BAR --> EDIT[Buka keranjang untuk ubah jumlah atau hapus item]
     EDIT --> D{Buat draft invoice?}
     D -->|Ya| CANVAS[Browser merender template invoice ke Canvas]
     CANVAS --> PREVIEW[Pratinjau draft PNG]
@@ -60,6 +61,7 @@ flowchart LR
 
 - `server.js` hanya melayani file statis. Request `/` diarahkan ke `public/index.html`; file `/src/*` disajikan dari folder `src`, dan aset lain dari `public`.
 - Data produk, ulasan, nomor WhatsApp, dan sumber video berada di `src/data/catalog.js`.
-- Pencarian, filter, serta keranjang dijalankan di browser. Keranjang disimpan dalam `Map` di memori, sehingga tidak tersimpan setelah halaman dimuat ulang.
+- Pencarian, filter, pengatur jumlah pada kartu, dan keranjang dijalankan di browser. Keranjang disimpan dalam `Map` di memori, sehingga tidak tersimpan setelah halaman dimuat ulang.
+- Saat keranjang berisi produk, ringkasan item dan total beserta tombol **Lihat keranjang** muncul tetap di bagian bawah layar.
 - Invoice dibuat di browser dari gambar template, lalu diunduh sebagai PNG. Sistem tidak menyimpan invoice atau pesanan di server.
 - Tombol WhatsApp membuka percakapan dengan pesan awal yang dikonfigurasi. Pelanggan perlu melampirkan invoice PNG yang sudah diunduh dan menekan kirim sendiri.
