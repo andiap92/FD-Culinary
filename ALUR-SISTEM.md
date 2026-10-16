@@ -1,0 +1,65 @@
+# Alur Sistem FD Culinary Saat Ini
+
+Dokumen ini menggambarkan implementasi yang ada di repositori: katalog statis, server Node.js untuk menyajikan file, dan alur pemesanan yang berakhir di WhatsApp. Sistem saat ini tidak memiliki API, database, maupun pemrosesan pesanan di server.
+
+## 1. Alur pengguna dan pemesanan
+
+```mermaid
+flowchart TD
+    U[Pengunjung membuka situs] --> S[Server Node.js menerima HTTP request]
+    S --> R{Path yang diminta}
+    R -->|/| HTML[public/index.html]
+    R -->|/src/*| SRC[src/ JavaScript dan CSS]
+    R -->|/assets/*| ASSET[public/assets gambar dan video]
+    HTML --> B[Browser menjalankan halaman]
+    SRC --> B
+    ASSET --> B
+    B --> DATA[src/data/catalog.js: katalog, review, konfigurasi]
+    DATA --> C[Katalog dan konten ditampilkan]
+    C --> F[Pengunjung memilih kategori/keluarga produk atau mencari]
+    F --> P[Daftar produk diperbarui di browser]
+    P --> A{Produk minuman ditambahkan?}
+    A -->|Ya| CART[Keranjang sementara di memori browser]
+    CART --> EDIT[Ubah jumlah, hapus item, lihat subtotal]
+    EDIT --> D{Buat draft invoice?}
+    D -->|Ya| CANVAS[Browser merender template invoice ke Canvas]
+    CANVAS --> PREVIEW[Pratinjau draft PNG]
+    PREVIEW --> CONF{Konfirmasi invoice?}
+    CONF -->|Kembali| CART
+    CONF -->|Ya| FINAL[Nomor invoice dibuat dan PNG diunduh]
+    FINAL --> CLEAR[Keranjang dikosongkan]
+    CLEAR --> WA[Buka WhatsApp dengan pesan awal]
+    WA --> SEND[Pengunjung melampirkan PNG dan mengirim pesan]
+    A -->|Tidak| C
+```
+
+## 2. Komponen dan batas sistem
+
+```mermaid
+flowchart LR
+    subgraph Browser[Browser pengunjung]
+        UI[public/index.html + src/css/styles.css]
+        APP[src/js/app.js: filter, pencarian, keranjang, invoice, review]
+        STATE[State sementara: keranjang dan pilihan UI]
+        CANVAS[Canvas dan unduhan PNG invoice]
+        UI <--> APP
+        APP <--> STATE
+        APP --> CANVAS
+    end
+    subgraph Hosting[Server/hosting]
+        NODE[server.js: HTTP static file server]
+        FILES[public/ dan src/]
+        NODE --> FILES
+    end
+    Browser -->|GET halaman, script, stylesheet, gambar, video| NODE
+    APP -->|tautan wa.me dengan pesan awal| WA[WhatsApp eksternal]
+    CONFIG[src/data/catalog.js: data katalog dan nomor WhatsApp] --> APP
+```
+
+## Catatan perilaku saat ini
+
+- `server.js` hanya melayani file statis. Request `/` diarahkan ke `public/index.html`; file `/src/*` disajikan dari folder `src`, dan aset lain dari `public`.
+- Data produk, ulasan, nomor WhatsApp, dan sumber video berada di `src/data/catalog.js`.
+- Pencarian, filter, serta keranjang dijalankan di browser. Keranjang disimpan dalam `Map` di memori, sehingga tidak tersimpan setelah halaman dimuat ulang.
+- Invoice dibuat di browser dari gambar template, lalu diunduh sebagai PNG. Sistem tidak menyimpan invoice atau pesanan di server.
+- Tombol WhatsApp membuka percakapan dengan pesan awal yang dikonfigurasi. Pelanggan perlu melampirkan invoice PNG yang sudah diunduh dan menekan kirim sendiri.

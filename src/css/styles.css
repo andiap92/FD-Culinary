@@ -1213,6 +1213,9 @@ code {
 }
 
 .add-cart-dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
   margin-top: 18px;
 }
 
@@ -1291,6 +1294,12 @@ code {
   font-size: 0.88rem;
 }
 
+.cart-line-total {
+  justify-self: end;
+  color: var(--brown-900);
+  font-size: 0.95rem;
+}
+
 .cart-item-controls {
   display: flex;
   align-items: center;
@@ -1313,6 +1322,41 @@ code {
 .cart-item-controls output {
   min-width: 22px;
   text-align: center;
+  font-weight: 700;
+}
+
+.product-quantity {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 5px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--white);
+}
+
+.product-quantity button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--brown-900);
+  background: var(--cream-200);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.product-quantity button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.product-quantity output {
+  min-width: 22px;
+  text-align: center;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
@@ -1525,7 +1569,9 @@ code {
   .cta-card { padding: 34px 26px; }
   .footer-contact { flex-wrap: wrap; }
   .workflow-dialog { padding: 22px 16px; border-radius: 20px; }
-  .cart-item { align-items: flex-start; grid-template-columns: 1fr; }
+  .cart-item { align-items: center; grid-template-columns: 1fr auto; }
+  .cart-item > div:first-child { grid-column: 1 / -1; }
+  .cart-line-total { justify-self: start; }
   .cart-item-controls { justify-content: flex-end; }
   .cart-dialog-actions, .invoice-dialog-actions { align-items: stretch; flex-direction: column-reverse; }
   .cart-dialog-actions .button, .invoice-dialog-actions .button { width: 100%; }

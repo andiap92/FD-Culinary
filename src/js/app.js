@@ -35,6 +35,7 @@ const elements = {
   addedProductName: document.querySelector("#addedProductName"),
   addedProductDetails: document.querySelector("#addedProductDetails"),
   continueAfterAdd: document.querySelector("#continueAfterAdd"),
+  viewCartAfterAdd: document.querySelector("#viewCartAfterAdd"),
   openCartButtons: [...document.querySelectorAll("[data-open-cart]")],
   cartButton: document.querySelector("#cartButton"),
   cartCount: document.querySelector("#cartCount"),
@@ -118,6 +119,21 @@ function addToCart(productId) {
     quantity: (current?.quantity ?? 0) + 1
   });
   renderCart();
+  renderProducts();
+}
+
+/** Changes the selected size's quantity directly from a product card. */
+function changeProductQuantity(productId, delta) {
+  const product = catalogItems.find((item) => item.id === productId);
+  if (!product || product.category !== "drink") return;
+  const option = getProductOption(product);
+  const key = `${product.id}:${option.sizeKey}`;
+  const current = state.cart.get(key);
+  const nextQuantity = (current?.quantity ?? 0) + delta;
+  if (nextQuantity <= 0) state.cart.delete(key);
+  else state.cart.set(key, { key, productId: product.id, sizeKey: option.sizeKey, quantity: nextQuantity });
+  renderCart();
+  renderProducts();
 }
 
 /** Recalculates cart display values from the catalog source data. */
@@ -142,7 +158,7 @@ function renderCart() {
     <article class="cart-item" data-cart-item="${item.key}">
       <div>
         <h3>${item.product.name}</h3>
-        <p>${item.sizeLabel} · ${formatCurrency(item.price)} per item · ${formatCurrency(item.lineTotal)}</p>
+        <p>${item.sizeLabel} · ${formatCurrency(item.price)} / botol</p>
       </div>
       <div class="cart-item-controls" aria-label="Jumlah ${item.product.name}">
         <button class="cart-quantity-button" type="button" data-cart-decrement="${item.key}" aria-label="Kurangi jumlah ${item.product.name}">−</button>
@@ -150,6 +166,7 @@ function renderCart() {
         <button class="cart-quantity-button" type="button" data-cart-increment="${item.key}" aria-label="Tambah jumlah ${item.product.name}">+</button>
         <button class="icon-button" type="button" data-cart-remove="${item.key}" aria-label="Hapus ${item.product.name} dari keranjang">×</button>
       </div>
+      <strong class="cart-line-total">${formatCurrency(item.lineTotal)}</strong>
     </article>`).join("");
   elements.cartSummary.hidden = entries.length === 0;
   elements.cartTotal.textContent = formatCurrency(total);
@@ -187,6 +204,7 @@ function handleCartItemsClick(event) {
     entry.quantity -= 1;
   }
   renderCart();
+  renderProducts();
 }
 
 /** Loads the supplied invoice artwork so every export uses the approved design. */
@@ -427,6 +445,8 @@ function createProductCard(product, index) {
   const isDrink = product.category === "drink";
   const option = getProductOption(product);
   const sizeSelector = isDrink ? createSizeSelector(product, option.sizeKey) : "";
+  const cartEntry = state.cart.get(`${product.id}:${option.sizeKey}`);
+  const quantity = cartEntry?.quantity ?? 0;
   return `
     <article class="product-card reveal-card" data-product-card="${product.id}" style="--delay: ${index * 55}ms">
       <div class="product-image interactive-image${option.sizeKey === drinkSizes[1].key ? " is-liter" : ""}">
@@ -444,6 +464,11 @@ function createProductCard(product, index) {
           <div class="product-actions">
             ${sizeSelector}
             ${isDrink ? `
+              <div class="product-quantity" aria-label="Jumlah ${product.name} ${option.sizeLabel}">
+                <button type="button" data-product-quantity="${product.id}" data-delta="-1" aria-label="Kurangi ${product.name}" ${quantity === 0 ? "disabled" : ""}>−</button>
+                <output aria-live="polite">${quantity}</output>
+                <button type="button" data-product-quantity="${product.id}" data-delta="1" aria-label="Tambah ${product.name}">+</button>
+              </div>
               <button
                 class="add-to-cart-button"
                 type="button"
@@ -494,6 +519,11 @@ function handleSearchInput(event) {
 
 /** Updates one drink card when its selected size changes. */
 function handleProductGridClick(event) {
+  const quantityButton = event.target.closest("[data-product-quantity]");
+  if (quantityButton) {
+    changeProductQuantity(quantityButton.dataset.productQuantity, Number(quantityButton.dataset.delta));
+    return;
+  }
   const addButton = event.target.closest("[data-add-to-cart]");
   if (addButton) {
     addToCart(addButton.dataset.addToCart);
@@ -517,6 +547,9 @@ function handleProductGridClick(event) {
   card.querySelector(".product-image img").alt = `${product.name}, ${option.sizeLabel}`;
   card.querySelector(".product-size-label").textContent = option.sizeLabel;
   card.querySelector(".product-footer > strong").textContent = formatCurrency(option.price);
+  const selectedEntry = state.cart.get(`${product.id}:${option.sizeKey}`);
+  card.querySelector(".product-quantity output").textContent = String(selectedEntry?.quantity ?? 0);
+  card.querySelector('[data-product-quantity][data-delta="-1"]').disabled = !selectedEntry;
   card.querySelector("[data-add-to-cart]").setAttribute(
     "aria-label",
     `Tambah ${product.name}, ukuran ${option.sizeLabel}, ke keranjang`
@@ -667,6 +700,10 @@ function bindEvents() {
   elements.continueAfterAdd.addEventListener("click", () => {
     elements.addCartDialog.close();
     document.querySelector("#catalog").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  elements.viewCartAfterAdd.addEventListener("click", () => {
+    elements.addCartDialog.close();
+    openCartDialog();
   });
   elements.addCartDialog.addEventListener("click", (event) => {
     if (event.target === elements.addCartDialog) elements.addCartDialog.close();

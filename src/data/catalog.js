@@ -1,6 +1,6 @@
 export const siteConfig = {
   brandName: "FD Culinary",
-  whatsappNumber: "081617603073",
+  whatsappNumber: "081282133312",
   whatsappMessage: "Hay Kak FD Kulinary, aku ingin pesan",
   videoSource: "/assets/video/clipreview.mp4"
 };
