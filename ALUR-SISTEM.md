@@ -25,7 +25,9 @@ flowchart TD
     EDIT --> CHECKOUT[Tombol Checkout]
     CHECKOUT --> MESSAGE[Ringkasan item, jumlah, harga, dan total dirangkai per baris]
     MESSAGE --> ENCODE[Pesan di-encode dengan encodeURIComponent]
-    ENCODE --> WA[Buka WhatsApp dengan detail pesanan]
+    ENCODE --> THANKS[Pop-up terima kasih tampil selama 3 detik]
+    THANKS --> RESET[Keranjang dikosongkan dan halaman dimuat ulang]
+    RESET --> WA[Buka WhatsApp dengan detail pesanan]
     WA --> SEND[Pengunjung memeriksa lalu mengirim pesan]
     A -->|Tidak| C
 ```
@@ -58,4 +60,5 @@ flowchart LR
 - Pencarian, filter, pengatur jumlah pada kartu, dan keranjang dijalankan di browser. Keranjang disimpan dalam `Map` di memori, sehingga tidak tersimpan setelah halaman dimuat ulang.
 - Saat keranjang berisi produk, ringkasan item dan total beserta tombol **Lihat keranjang** muncul tetap di bagian bawah layar.
 - Tombol **Checkout** merangkai nama produk, ukuran, jumlah, total tiap produk, dan total pesanan menjadi pesan berbaris. Pesan di-encode dengan `encodeURIComponent` sebelum ditambahkan ke tautan WhatsApp.
+- Setelah checkout, pop-up ucapan terima kasih tampil selama 3 detik. Keranjang dikosongkan, halaman dimuat ulang, lalu browser beralih ke WhatsApp membawa detail pesanan.
 - Checkout membuka percakapan WhatsApp yang dituju. Pelanggan memeriksa detail pesanan lalu mengirim pesan sendiri; pesanan tidak disimpan di server.

@@ -4,6 +4,7 @@ const drinkSizes = [
   { key: "250ml", label: "250 ml" },
   { key: "1L", label: "1 L" }
 ];
+const pendingCheckoutKey = "fdCulinaryPendingWhatsAppCheckout";
 
 const state = {
   activeCategory: "drink",
@@ -40,6 +41,7 @@ const elements = {
   cartTotal: document.querySelector("#cartTotal"),
   continueShopping: document.querySelector("#continueShopping"),
   checkoutButton: document.querySelector("#checkoutButton"),
+  checkoutThankYou: document.querySelector("#checkoutThankYou"),
   productGrid: document.querySelector("#productGrid"),
   reviewCard: document.querySelector("#reviewCard"),
   reviewHeading: document.querySelector("#reviewsTitle"),
@@ -189,8 +191,13 @@ function checkoutToWhatsApp() {
     "",
     `Total pesanan: ${formatCurrency(total)}`
   ].join("\n");
-  window.open(getWhatsAppUrl(message), "_blank", "noopener,noreferrer");
+  sessionStorage.setItem(pendingCheckoutKey, getWhatsAppUrl(message));
+  state.cart.clear();
+  renderCart();
+  renderProducts();
   elements.cartDialog.close();
+  elements.checkoutThankYou.showModal();
+  window.setTimeout(() => window.location.reload(), 3000);
 }
 
 /** Returns products matching the selected category, drink family, and search query. */
@@ -451,6 +458,12 @@ function bindEvents() {
 
 /** Initializes all dynamic content and page behavior. */
 function initializeApp() {
+  const pendingCheckoutUrl = sessionStorage.getItem(pendingCheckoutKey);
+  if (pendingCheckoutUrl) {
+    sessionStorage.removeItem(pendingCheckoutKey);
+    window.location.replace(pendingCheckoutUrl);
+    return;
+  }
   document.body.classList.add("js-ready");
   elements.currentYear.textContent = String(new Date().getFullYear());
   elements.footerWhatsapp.href = getWhatsAppUrl();
