@@ -12,10 +12,6 @@ const state = {
   reviewTimer: null,
   searchQuery: "",
   cart: new Map(),
-  draftOrder: null,
-  finalInvoice: null,
-  invoicePreviewUrl: null,
-  invoiceTemplateImage: null,
   selectedSizes: Object.fromEntries(
     catalogItems
       .filter((product) => product.category === "drink")
@@ -43,17 +39,7 @@ const elements = {
   cartSummary: document.querySelector("#cartSummary"),
   cartTotal: document.querySelector("#cartTotal"),
   continueShopping: document.querySelector("#continueShopping"),
-  createDraftInvoice: document.querySelector("#createDraftInvoice"),
-  invoiceDialog: document.querySelector("#invoiceDialog"),
-  invoiceClose: document.querySelector("#invoiceClose"),
-  invoicePreview: document.querySelector("#invoicePreview"),
-  invoiceDraftStage: document.querySelector("#invoiceDraftStage"),
-  invoiceSuccess: document.querySelector("#invoiceSuccess"),
-  invoiceNumberNotice: document.querySelector("#invoiceNumberNotice"),
-  invoiceError: document.querySelector("#invoiceError"),
-  backToCart: document.querySelector("#backToCart"),
-  confirmInvoice: document.querySelector("#confirmInvoice"),
-  continueToWhatsapp: document.querySelector("#continueToWhatsapp"),
+  checkoutButton: document.querySelector("#checkoutButton"),
   productGrid: document.querySelector("#productGrid"),
   reviewCard: document.querySelector("#reviewCard"),
   reviewHeading: document.querySelector("#reviewsTitle"),
@@ -152,7 +138,7 @@ function renderCart() {
     </article>`).join("");
   elements.cartSummary.hidden = entries.length === 0;
   elements.cartTotal.textContent = formatCurrency(total);
-  elements.createDraftInvoice.disabled = entries.length === 0;
+  elements.checkoutButton.disabled = entries.length === 0;
 }
 
 /** Opens the cart dialog from any cart CTA. */
@@ -179,215 +165,6 @@ function handleCartItemsClick(event) {
   renderProducts();
 }
 
-/** Loads the supplied invoice artwork so every export uses the approved design. */
-async function loadInvoiceTemplate() {
-  if (state.invoiceTemplateImage) return state.invoiceTemplateImage;
-  const image = new Image();
-  image.src = "/assets/images/invoice-template.png";
-  if (image.decode) await image.decode();
-  else await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = reject; });
-  state.invoiceTemplateImage = image;
-  return image;
-}
-
-function tileTemplatePatch(context, template, sourceX, sourceY, sourceWidth, height, targetX, targetY, targetWidth) {
-  for (let offset = 0; offset < targetWidth; offset += sourceWidth) {
-    const chunkWidth = Math.min(sourceWidth, targetWidth - offset);
-    context.drawImage(template, sourceX, sourceY, chunkWidth, height, targetX + offset, targetY, chunkWidth, height);
-  }
-}
-
-/** Renders the uploaded invoice artwork with only the order fields replaced. */
-async function createInvoiceCanvas(order, invoiceNumber = "Draft Invoice") {
-  const template = await loadInvoiceTemplate();
-  const width = 1024;
-  const height = 1536;
-  const tableX = 73;
-  const tableTop = 713;
-  const headerHeight = 73;
-  const rowHeight = 88;
-  const bodyTop = tableTop + headerHeight;
-  const tableBottom = bodyTop + rowHeight * order.length;
-  const extraHeight = Math.max(0, order.length - 2) * rowHeight;
-  const lowerContentSourceY = 987;
-  const lowerContentY = lowerContentSourceY + extraHeight;
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height + extraHeight;
-  const context = canvas.getContext("2d");
-  if (!context) throw new Error("Browser tidak dapat menyiapkan invoice.");
-
-  context.fillStyle = "#fff8eb";
-  context.fillRect(0, 0, width, canvas.height);
-  context.drawImage(template, 0, 0, width, lowerContentSourceY, 0, 0, width, lowerContentSourceY);
-  context.drawImage(
-    template,
-    0, lowerContentSourceY, width, height - lowerContentSourceY,
-    0, lowerContentY, width, height - lowerContentSourceY
-  );
-  if (extraHeight > 0) {
-    context.fillStyle = "#a47526";
-    context.fillRect(18, lowerContentSourceY, 4, extraHeight);
-    context.fillRect(width - 22, lowerContentSourceY, 4, extraHeight);
-    context.fillStyle = "#c99b4f";
-    context.fillRect(31, lowerContentSourceY, 2, extraHeight);
-    context.fillRect(width - 33, lowerContentSourceY, 2, extraHeight);
-  }
-
-  const dateLabel = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
-  tileTemplatePatch(context, template, 523, 590, 60, 80, 193, 590, 300);
-  tileTemplatePatch(context, template, 523, 590, 60, 80, 670, 590, 263);
-  context.fillStyle = "#17150f";
-  context.font = "25px Arial, sans-serif";
-  context.textBaseline = "alphabetic";
-  context.fillText("No. Invoice", 199, 620);
-  context.font = "bold 29px Arial, sans-serif";
-  context.fillText(invoiceNumber, 199, 656, 292);
-  context.font = "25px Arial, sans-serif";
-  context.fillText("Tanggal Pesanan", 677, 620);
-  context.font = "bold 29px Arial, sans-serif";
-  context.fillText(dateLabel, 677, 656, 253);
-
-  context.fillStyle = "#fff9ef";
-  context.fillRect(tableX, bodyTop, 880, rowHeight * order.length);
-  context.strokeStyle = "#bd8843";
-  context.lineWidth = 1.25;
-  context.beginPath();
-  context.moveTo(tableX, bodyTop);
-  context.lineTo(tableX, tableBottom - 18);
-  context.quadraticCurveTo(tableX, tableBottom, tableX + 18, tableBottom);
-  context.lineTo(tableX + 862, tableBottom);
-  context.quadraticCurveTo(tableX + 880, tableBottom, tableX + 880, tableBottom - 18);
-  context.lineTo(tableX + 880, bodyTop);
-  context.moveTo(190, bodyTop);
-  context.lineTo(190, tableBottom);
-  context.moveTo(553, bodyTop);
-  context.lineTo(553, tableBottom);
-  context.moveTo(710, bodyTop);
-  context.lineTo(710, tableBottom);
-  order.forEach((item, index) => {
-    const rowTop = bodyTop + (index * rowHeight);
-    if (index > 0) {
-      context.moveTo(tableX, rowTop);
-      context.lineTo(tableX + 880, rowTop);
-    }
-  });
-  context.stroke();
-
-  order.forEach((item, index) => {
-    const rowTop = bodyTop + index * rowHeight;
-    const centerY = rowTop + 48;
-    context.fillStyle = "#11100d";
-    context.textBaseline = "middle";
-    context.textAlign = "center";
-    context.font = "bold 29px Arial, sans-serif";
-    context.fillText(String(index + 1), 131, centerY);
-    context.fillText(String(item.quantity), 631, centerY);
-    context.textAlign = "right";
-    context.font = "bold 27px Arial, sans-serif";
-    context.fillText(formatCurrency(item.lineTotal), 930, centerY, 211);
-    context.textAlign = "left";
-    context.font = "bold 25px Arial, sans-serif";
-    context.fillText(item.product.name, 217, rowTop + 34, 323);
-    context.fillStyle = "#68583e";
-    context.font = "19px Arial, sans-serif";
-    context.fillText(`Ukuran ${item.sizeLabel}`, 217, rowTop + 66, 323);
-  });
-
-  const total = order.reduce((sum, item) => sum + item.lineTotal, 0);
-  tileTemplatePatch(context, template, 100, 1003, 120, 48, 692, lowerContentY + 16, 239);
-  context.fillStyle = "#15130e";
-  context.textAlign = "right";
-  context.textBaseline = "alphabetic";
-  context.font = "bold 42px Georgia, 'Times New Roman', serif";
-  context.fillText(formatCurrency(total), 908, lowerContentY + 57, 224);
-  return canvas;
-}
-
-function canvasToPngBlob(canvas) {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("PNG invoice gagal dibuat.")), "image/png");
-  });
-}
-
-function showInvoicePreview(blob, alt) {
-  if (state.invoicePreviewUrl) URL.revokeObjectURL(state.invoicePreviewUrl);
-  state.invoicePreviewUrl = URL.createObjectURL(blob);
-  elements.invoicePreview.src = state.invoicePreviewUrl;
-  elements.invoicePreview.alt = alt;
-}
-
-/** Prepares a draft invoice PNG preview from the current cart. */
-async function createDraftInvoice() {
-  const order = getCartEntries();
-  if (!order.length) return;
-  state.draftOrder = order.map(({ productId, sizeKey, quantity, product, sizeLabel, price, lineTotal }) => ({
-    productId, sizeKey, quantity, product, sizeLabel, price, lineTotal
-  }));
-  state.finalInvoice = null;
-  elements.confirmInvoice.disabled = false;
-  elements.invoiceError.hidden = true;
-  elements.invoiceDraftStage.hidden = false;
-  elements.invoiceSuccess.hidden = true;
-  try {
-    const canvas = await createInvoiceCanvas(state.draftOrder);
-    showInvoicePreview(await canvasToPngBlob(canvas), "Pratinjau Draft Invoice FD Culinary");
-    elements.cartDialog.close();
-    elements.invoiceDialog.showModal();
-  } catch (error) {
-    elements.invoiceError.textContent = error.message || "Draft invoice belum dapat dibuat. Coba lagi.";
-    elements.invoiceError.hidden = false;
-    elements.cartDialog.close();
-    elements.invoiceDialog.showModal();
-  }
-}
-
-/** Starts downloading a generated invoice PNG. */
-async function downloadInvoicePng(blob, fileName) {
-  const downloadUrl = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = downloadUrl;
-  link.download = fileName;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 30000);
-}
-
-function generateInvoiceNumber() {
-  const now = new Date();
-  const day = String(now.getDate()).padStart(2, "0");
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const year = String(now.getFullYear()).slice(-2);
-  const hour = String(now.getHours()).padStart(2, "0");
-  const minute = String(now.getMinutes()).padStart(2, "0");
-  return `FD-${day}${month}${year}-${hour}${minute}`;
-}
-
-/** Finalizes and downloads the invoice only after the customer confirms it. */
-async function confirmAndDownloadInvoice() {
-  if (!state.draftOrder?.length || state.finalInvoice) return;
-  elements.confirmInvoice.disabled = true;
-  elements.invoiceError.hidden = true;
-  try {
-    const invoiceNumber = generateInvoiceNumber();
-    const canvas = await createInvoiceCanvas(state.draftOrder, invoiceNumber);
-    const png = await canvasToPngBlob(canvas);
-    await downloadInvoicePng(png, `${invoiceNumber}.png`);
-    state.finalInvoice = { number: invoiceNumber, items: state.draftOrder };
-    showInvoicePreview(png, `Invoice final ${invoiceNumber} FD Culinary`);
-    state.cart.clear();
-    renderCart();
-    elements.invoiceNumberNotice.textContent = `Nomor invoice: ${invoiceNumber}. Lampirkan file PNG yang terunduh sebelum mengirim pesan.`;
-    elements.invoiceDraftStage.hidden = true;
-    elements.invoiceSuccess.hidden = false;
-  } catch (error) {
-    elements.invoiceError.textContent = error.message || "Invoice final belum dapat diunduh. Periksa pesanan lalu coba lagi.";
-    elements.invoiceError.hidden = false;
-    elements.confirmInvoice.disabled = false;
-  }
-}
-
 function getWhatsAppUrl(message = siteConfig.whatsappMessage) {
   const recipient = siteConfig.whatsappNumber.replace(/\D/g, "");
   const whatsappRecipient = recipient.startsWith("0") ? `62${recipient.slice(1)}` : recipient;
@@ -395,10 +172,25 @@ function getWhatsAppUrl(message = siteConfig.whatsappMessage) {
   return `${baseUrl}?text=${encodeURIComponent(message)}`;
 }
 
-/** Opens WhatsApp after the final invoice has been downloaded. */
-function continueToWhatsApp() {
-  if (!state.finalInvoice) return;
-  window.open(getWhatsAppUrl(), "_blank", "noopener,noreferrer");
+/** Sends a neatly formatted order summary to the configured WhatsApp number. */
+function checkoutToWhatsApp() {
+  const entries = getCartEntries();
+  if (!entries.length) return;
+  const total = entries.reduce((sum, item) => sum + item.lineTotal, 0);
+  const itemLines = entries.map((item, index) => [
+    `${index + 1}. ${item.product.name} (${item.sizeLabel})`,
+    `   Jumlah: ${item.quantity}`,
+    `   Total: ${formatCurrency(item.lineTotal)}`
+  ].join("\n"));
+  const message = [
+    "Hay, kak FD Culinary aku ingin pesan",
+    "",
+    ...itemLines,
+    "",
+    `Total pesanan: ${formatCurrency(total)}`
+  ].join("\n");
+  window.open(getWhatsAppUrl(message), "_blank", "noopener,noreferrer");
+  elements.cartDialog.close();
 }
 
 /** Returns products matching the selected category, drink family, and search query. */
@@ -649,14 +441,7 @@ function bindEvents() {
     elements.cartDialog.close();
     document.querySelector("#catalog").scrollIntoView({ behavior: "smooth", block: "start" });
   });
-  elements.createDraftInvoice.addEventListener("click", createDraftInvoice);
-  elements.invoiceClose.addEventListener("click", () => elements.invoiceDialog.close());
-  elements.backToCart.addEventListener("click", () => {
-    elements.invoiceDialog.close();
-    openCartDialog();
-  });
-  elements.confirmInvoice.addEventListener("click", confirmAndDownloadInvoice);
-  elements.continueToWhatsapp.addEventListener("click", continueToWhatsApp);
+  elements.checkoutButton.addEventListener("click", checkoutToWhatsApp);
   elements.reviewNext.addEventListener("click", showNextReview);
   elements.reviewPrevious.addEventListener("click", showPreviousReview);
   elements.reviewProgress.addEventListener("click", handleReviewProgressClick);

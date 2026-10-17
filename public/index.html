@@ -189,7 +189,7 @@
       </div>
       <div class="cart-empty" id="cartEmpty">
         <strong>Keranjang masih kosong.</strong>
-        <p>Tambahkan minuman dari katalog untuk membuat invoice.</p>
+        <p>Tambahkan produk dari katalog untuk mulai checkout.</p>
       </div>
       <div class="cart-items" id="cartItems" aria-live="polite"></div>
       <div class="cart-summary" id="cartSummary" hidden>
@@ -197,33 +197,7 @@
       </div>
       <div class="cart-dialog-actions">
         <button class="button button-outline" id="continueShopping" type="button">Lanjut pilih produk</button>
-        <button class="button button-dark" id="createDraftInvoice" type="button" disabled>Buat draft invoice</button>
-      </div>
-    </dialog>
-
-    <dialog class="workflow-dialog invoice-dialog" id="invoiceDialog" aria-labelledby="invoiceDialogTitle">
-      <div class="workflow-dialog-header">
-        <div><p class="eyebrow">Konfirmasi pesanan</p><h2 id="invoiceDialogTitle">Periksa invoice</h2></div>
-        <button class="icon-button dialog-close" id="invoiceClose" type="button" aria-label="Tutup invoice">×</button>
-      </div>
-      <div class="invoice-preview-frame"><img id="invoicePreview" alt="Pratinjau Draft Invoice FD Culinary" /></div>
-      <div id="invoiceDraftStage">
-        <p class="invoice-instruction">Pastikan produk, ukuran, jumlah, dan harga sudah benar. Invoice masih berstatus <strong>Draft Invoice</strong> sampai kamu mengonfirmasi.</p>
-        <div class="invoice-dialog-actions">
-          <button class="button button-outline" id="backToCart" type="button">Ubah pesanan</button>
-          <button class="button button-dark" id="confirmInvoice" type="button">Konfirmasi &amp; download PNG</button>
-        </div>
-        <p class="invoice-error" id="invoiceError" role="alert" hidden></p>
-      </div>
-      <div class="invoice-success" id="invoiceSuccess" hidden>
-        <strong>Invoice final berhasil diunduh.</strong>
-        <p id="invoiceNumberNotice"></p>
-        <ol>
-          <li>Buka WhatsApp melalui tombol di bawah.</li>
-          <li>Lampirkan PNG invoice yang baru diunduh ke chat.</li>
-          <li>Kirim pesan kepada owner untuk konfirmasi pesanan dan pembayaran.</li>
-        </ol>
-        <button class="button button-dark" id="continueToWhatsapp" type="button">Lanjut ke WhatsApp</button>
+        <button class="button button-dark" id="checkoutButton" type="button" disabled>Checkout</button>
       </div>
     </dialog>
 

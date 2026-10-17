@@ -22,15 +22,11 @@ flowchart TD
     A --> CART[Keranjang sementara di memori browser]
     CART --> BAR[Ringkasan jumlah dan total tampil di bar bawah]
     BAR --> EDIT[Buka keranjang untuk ubah jumlah atau hapus item]
-    EDIT --> D{Buat draft invoice?}
-    D -->|Ya| CANVAS[Browser merender template invoice ke Canvas]
-    CANVAS --> PREVIEW[Pratinjau draft PNG]
-    PREVIEW --> CONF{Konfirmasi invoice?}
-    CONF -->|Kembali| CART
-    CONF -->|Ya| FINAL[Nomor invoice dibuat dan PNG diunduh]
-    FINAL --> CLEAR[Keranjang dikosongkan]
-    CLEAR --> WA[Buka WhatsApp dengan pesan awal]
-    WA --> SEND[Pengunjung melampirkan PNG dan mengirim pesan]
+    EDIT --> CHECKOUT[Tombol Checkout]
+    CHECKOUT --> MESSAGE[Ringkasan item, jumlah, harga, dan total dirangkai per baris]
+    MESSAGE --> ENCODE[Pesan di-encode dengan encodeURIComponent]
+    ENCODE --> WA[Buka WhatsApp dengan detail pesanan]
+    WA --> SEND[Pengunjung memeriksa lalu mengirim pesan]
     A -->|Tidak| C
 ```
 
@@ -40,12 +36,10 @@ flowchart TD
 flowchart LR
     subgraph Browser[Browser pengunjung]
         UI[public/index.html + src/css/styles.css]
-        APP[src/js/app.js: filter, pencarian, keranjang, invoice, review]
+        APP[src/js/app.js: filter, pencarian, keranjang, checkout WhatsApp, review]
         STATE[State sementara: keranjang dan pilihan UI]
-        CANVAS[Canvas dan unduhan PNG invoice]
         UI <--> APP
         APP <--> STATE
-        APP --> CANVAS
     end
     subgraph Hosting[Server/hosting]
         NODE[server.js: HTTP static file server]
@@ -63,5 +57,5 @@ flowchart LR
 - Data produk, ulasan, nomor WhatsApp, dan sumber video berada di `src/data/catalog.js`.
 - Pencarian, filter, pengatur jumlah pada kartu, dan keranjang dijalankan di browser. Keranjang disimpan dalam `Map` di memori, sehingga tidak tersimpan setelah halaman dimuat ulang.
 - Saat keranjang berisi produk, ringkasan item dan total beserta tombol **Lihat keranjang** muncul tetap di bagian bawah layar.
-- Invoice dibuat di browser dari gambar template, lalu diunduh sebagai PNG. Sistem tidak menyimpan invoice atau pesanan di server.
-- Tombol WhatsApp membuka percakapan dengan pesan awal yang dikonfigurasi. Pelanggan perlu melampirkan invoice PNG yang sudah diunduh dan menekan kirim sendiri.
+- Tombol **Checkout** merangkai nama produk, ukuran, jumlah, total tiap produk, dan total pesanan menjadi pesan berbaris. Pesan di-encode dengan `encodeURIComponent` sebelum ditambahkan ke tautan WhatsApp.
+- Checkout membuka percakapan WhatsApp yang dituju. Pelanggan memeriksa detail pesanan lalu mengirim pesan sendiri; pesanan tidak disimpan di server.
