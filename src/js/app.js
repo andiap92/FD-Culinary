@@ -101,7 +101,7 @@ function changeProductQuantity(productId, delta) {
   if (nextQuantity <= 0) state.cart.delete(key);
   else state.cart.set(key, { key, productId: product.id, sizeKey: option.sizeKey, quantity: nextQuantity });
   renderCart();
-  renderProducts();
+  updateProductCard(product.id);
 }
 
 /** Recalculates cart display values from the catalog source data. */
@@ -156,6 +156,7 @@ function handleCartItemsClick(event) {
   const key = button.dataset.cartIncrement ?? button.dataset.cartDecrement ?? button.dataset.cartRemove;
   const entry = state.cart.get(key);
   if (!entry) return;
+  const productId = entry.productId;
   if (button.hasAttribute("data-cart-remove") || (button.hasAttribute("data-cart-decrement") && entry.quantity <= 1)) {
     state.cart.delete(key);
   } else if (button.hasAttribute("data-cart-increment")) {
@@ -164,7 +165,7 @@ function handleCartItemsClick(event) {
     entry.quantity -= 1;
   }
   renderCart();
-  renderProducts();
+  updateProductCard(productId);
 }
 
 function getWhatsAppUrl(message = siteConfig.whatsappMessage) {
@@ -194,7 +195,8 @@ function checkoutToWhatsApp() {
   sessionStorage.setItem(pendingCheckoutKey, getWhatsAppUrl(message));
   state.cart.clear();
   renderCart();
-  renderProducts();
+  [...elements.productGrid.querySelectorAll("[data-product-card]")]
+    .forEach((card) => updateProductCard(card.dataset.productCard));
   elements.cartDialog.close();
   elements.checkoutThankYou.showModal();
   window.setTimeout(() => window.location.reload(), 3000);
@@ -252,8 +254,22 @@ function renderProducts() {
     : `<div class="empty-state"><strong>Menu belum ditemukan.</strong><p>Coba kata kunci lain atau pilih kategori berbeda.</p></div>`;
 }
 
+/** Updates only the visible card whose selection or cart quantity changed. */
+function updateProductCard(productId) {
+  const card = [...elements.productGrid.querySelectorAll("[data-product-card]")]
+    .find((item) => item.dataset.productCard === productId);
+  const product = catalogItems.find((item) => item.id === productId);
+  if (!card || !product) return;
+
+  const option = getProductOption(product);
+  const cartEntry = state.cart.get(`${product.id}:${option.sizeKey}`);
+  card.querySelector(".product-quantity output").textContent = String(cartEntry?.quantity ?? 0);
+  card.querySelector('[data-product-quantity][data-delta="-1"]').disabled = !cartEntry;
+}
+
 /** Switches the active drink family and refreshes only the catalog grid. */
 function setActiveProductFamily(family) {
+  if (state.activeProductFamily === family) return;
   state.activeProductFamily = family;
   elements.familyFilterButtons.forEach((button) => {
     const isActive = button.dataset.productFamily === family;
@@ -298,9 +314,7 @@ function handleProductGridClick(event) {
   card.querySelector(".product-image").classList.toggle("is-liter", selectedSize === drinkSizes[1].key);
   card.querySelector(".product-image img").alt = `${product.name}, ${option.sizeLabel}`;
   card.querySelector(".product-price").textContent = formatCurrency(option.price);
-  const selectedEntry = state.cart.get(`${product.id}:${option.sizeKey}`);
-  card.querySelector(".product-quantity output").textContent = String(selectedEntry?.quantity ?? 0);
-  card.querySelector('[data-product-quantity][data-delta="-1"]').disabled = !selectedEntry;
+  updateProductCard(productId);
   card.querySelectorAll("[data-size-option]").forEach((button) => {
     const isSelected = button.dataset.sizeValue === selectedSize;
     button.classList.toggle("is-selected", isSelected);
