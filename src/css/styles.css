@@ -1530,7 +1530,8 @@ body:has(.sticky-cart:not([hidden])) {
 @media (max-width: 900px) {
   :root { --container: min(100% - 32px, 720px); }
   .site-header { padding: 10px 0; }
-  .mobile-menu-button { display: block; }
+  .mobile-menu-button { display: block; order: 3; }
+  .navbar > .cart-icon-button { order: 2; margin-left: auto; }
   .nav-panel {
     position: absolute;
     top: calc(100% + 12px);
