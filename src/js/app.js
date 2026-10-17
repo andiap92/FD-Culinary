@@ -63,6 +63,11 @@ function formatCurrency(value) {
   }).format(value);
 }
 
+/** Formats a WhatsApp order amount without the currency prefix. */
+function formatWhatsAppAmount(value) {
+  return new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(value);
+}
+
 /** Returns the selected unit price and label for a drink. */
 function getProductOption(product, size = state.selectedSizes[product.id] ?? drinkSizes[0].key) {
   const selectedSize = drinkSizes.find((option) => option.key === size) ?? drinkSizes[0];
@@ -180,17 +185,15 @@ function checkoutToWhatsApp() {
   const entries = getCartEntries();
   if (!entries.length) return;
   const total = entries.reduce((sum, item) => sum + item.lineTotal, 0);
-  const itemLines = entries.map((item, index) => [
-    `${index + 1}. ${item.product.name} (${item.sizeLabel})`,
-    `   Jumlah: ${item.quantity}`,
-    `   Total: ${formatCurrency(item.lineTotal)}`
-  ].join("\n"));
+  const itemLines = entries.map((item) => {
+    const size = item.sizeLabel.replace(/\s+/g, "");
+    const quantity = item.quantity > 1 ? `*${item.quantity}` : "";
+    return `${item.product.name}(${size})${quantity} : ${formatWhatsAppAmount(item.lineTotal)}`;
+  });
   const message = [
-    "Hay, kak FD Culinary aku ingin pesan",
-    "",
     ...itemLines,
     "",
-    `Total pesanan: ${formatCurrency(total)}`
+    `Total Pesanan: ${formatWhatsAppAmount(total)}`
   ].join("\n");
   sessionStorage.setItem(pendingCheckoutKey, getWhatsAppUrl(message));
   state.cart.clear();
