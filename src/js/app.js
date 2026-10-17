@@ -191,6 +191,8 @@ function checkoutToWhatsApp() {
     return `${item.product.name}(${size})${quantity} : ${formatWhatsAppAmount(item.lineTotal)}`;
   });
   const message = [
+    "Hay Kak FD Kulinary, aku ingin pesan",
+    "",
     ...itemLines,
     "",
     `Total Pesanan: ${formatWhatsAppAmount(total)}`
