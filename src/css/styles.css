@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap");
 
+/* Token warna, jarak, radius, dan animasi dipusatkan agar gaya konsisten. */
 :root {
   --brown-900: #331b10;
   --brown-800: #4f2c1c;
@@ -22,6 +23,7 @@
   --transition: 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Gaya dasar menormalkan elemen dan mengatur tipografi serta navigasi umum. */
 * {
   box-sizing: border-box;
 }
@@ -100,6 +102,7 @@ code {
   background: var(--cream-200);
 }
 
+/* Header, pencarian, dan tombol navigasi utama. */
 .site-header {
   position: fixed;
   z-index: 1000;
@@ -282,6 +285,7 @@ code {
   background: var(--cream-50);
 }
 
+/* Bagian pembuka menampilkan identitas dan ajakan utama toko. */
 .hero {
   position: relative;
   min-height: 100svh;
@@ -438,6 +442,7 @@ code {
   animation: bounce 2s infinite;
 }
 
+/* Tata letak bersama untuk cerita, katalog, ulasan, dan ajakan bertindak. */
 .section {
   padding: clamp(88px, 10vw, 150px) 0;
 }
@@ -525,6 +530,7 @@ code {
   color: var(--muted);
 }
 
+/* Filter kategori, kartu produk, ukuran, dan kontrol jumlah pesanan. */
 .catalog {
   background: var(--cream-100);
 }
@@ -725,6 +731,7 @@ code {
   font-size: 1.1rem;
 }
 
+/* Ringkasan keranjang, dialog checkout, dan kontrol kuantitas. */
 .cart-icon-button {
   position: relative;
   display: inline-grid;

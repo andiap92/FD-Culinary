@@ -1,3 +1,4 @@
+// Pengaturan utama situs, termasuk nomor WhatsApp dan sumber video.
 export const siteConfig = {
   brandName: "FD Culinary",
   whatsappNumber: "081282133312",
@@ -5,6 +6,7 @@ export const siteConfig = {
   videoSource: "/assets/video/clipreview.mp4"
 };
 
+// Data produk menjadi satu-satunya sumber untuk kartu katalog dan keranjang.
 export const catalogItems = [
   {
     id: "roasted-jasmine",
@@ -126,6 +128,7 @@ export const catalogItems = [
   }
 ];
 
+// Testimoni dikelompokkan berdasarkan kategori agar dapat difilter oleh antarmuka.
 export const reviews = [
   {
     name: "Aulia",

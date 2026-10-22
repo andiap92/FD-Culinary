@@ -4,8 +4,10 @@ const drinkSizes = [
   { key: "250ml", label: "250 ml" },
   { key: "1L", label: "1 L" }
 ];
+// Kunci ini menyimpan tujuan checkout sementara sebelum halaman diarahkan ke WhatsApp.
 const pendingCheckoutKey = "fdCulinaryPendingWhatsAppCheckout";
 
+// Seluruh pilihan antarmuka disimpan di satu objek agar perubahan mudah dilacak.
 const state = {
   activeCategory: "drink",
   activeProductFamily: "Milk & Tea Based",
@@ -54,7 +56,7 @@ const elements = {
   videoPlaceholder: document.querySelector("#videoPlaceholder")
 };
 
-/** Formats a number as Indonesian rupiah without decimal digits. */
+/** Memformat angka sebagai rupiah tanpa angka desimal. */
 function formatCurrency(value) {
   return new Intl.NumberFormat("id-ID", {
     currency: "IDR",
@@ -63,12 +65,12 @@ function formatCurrency(value) {
   }).format(value);
 }
 
-/** Formats a WhatsApp order amount without the currency prefix. */
+/** Memformat nilai pesanan agar ringkas saat dikirim melalui WhatsApp. */
 function formatWhatsAppAmount(value) {
   return new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(value);
 }
 
-/** Returns the selected unit price and label for a drink. */
+/** Mengambil harga dan label berdasarkan ukuran minuman yang dipilih. */
 function getProductOption(product, size = state.selectedSizes[product.id] ?? drinkSizes[0].key) {
   const selectedSize = drinkSizes.find((option) => option.key === size) ?? drinkSizes[0];
   const isLiter = product.category === "drink" && selectedSize.key === drinkSizes[1].key;
@@ -79,7 +81,7 @@ function getProductOption(product, size = state.selectedSizes[product.id] ?? dri
   };
 }
 
-/** Builds the segmented size selector for a drink card. */
+/** Membuat tombol pilihan ukuran pada kartu minuman. */
 function createSizeSelector(product, selectedSize) {
   return `
     <div class="size-selector" role="group" aria-label="Pilih ukuran ${product.name}">
@@ -95,7 +97,7 @@ function createSizeSelector(product, selectedSize) {
     </div>`;
 }
 
-/** Changes the selected size's quantity directly from a product card. */
+/** Mengubah jumlah produk terpilih langsung dari kartu katalog. */
 function changeProductQuantity(productId, delta) {
   const product = catalogItems.find((item) => item.id === productId);
   if (!product || product.category !== "drink") return;
@@ -109,7 +111,7 @@ function changeProductQuantity(productId, delta) {
   updateProductCard(product.id);
 }
 
-/** Recalculates cart display values from the catalog source data. */
+/** Menghitung ulang rincian keranjang berdasarkan data katalog terbaru. */
 function getCartEntries() {
   return [...state.cart.values()].map((entry) => {
     const product = catalogItems.find((item) => item.id === entry.productId);
@@ -119,7 +121,7 @@ function getCartEntries() {
   }).filter(Boolean);
 }
 
-/** Renders the in-memory cart and its item count. */
+/** Menampilkan isi keranjang dan memperbarui jumlah item pada halaman. */
 function renderCart() {
   const entries = getCartEntries();
   const itemCount = entries.reduce((total, item) => total + item.quantity, 0);
@@ -148,13 +150,13 @@ function renderCart() {
   elements.checkoutButton.disabled = entries.length === 0;
 }
 
-/** Opens the cart dialog from any cart CTA. */
+/** Membuka dialog keranjang dari tombol yang tersedia. */
 function openCartDialog() {
   renderCart();
   elements.cartDialog.showModal();
 }
 
-/** Updates or removes a cart line from the cart dialog. */
+/** Memperbarui atau menghapus baris produk dari dialog keranjang. */
 function handleCartItemsClick(event) {
   const button = event.target.closest("[data-cart-increment], [data-cart-decrement], [data-cart-remove]");
   if (!button) return;
@@ -173,6 +175,7 @@ function handleCartItemsClick(event) {
   updateProductCard(productId);
 }
 
+/** Membentuk tautan WhatsApp dengan pesan yang telah dienkode dengan aman. */
 function getWhatsAppUrl(message = siteConfig.whatsappMessage) {
   const recipient = siteConfig.whatsappNumber.replace(/\D/g, "");
   const whatsappRecipient = recipient.startsWith("0") ? `62${recipient.slice(1)}` : recipient;
@@ -180,7 +183,7 @@ function getWhatsAppUrl(message = siteConfig.whatsappMessage) {
   return `${baseUrl}?text=${encodeURIComponent(message)}`;
 }
 
-/** Sends a neatly formatted order summary to the configured WhatsApp number. */
+/** Menyiapkan ringkasan pesanan dan mengarahkannya ke nomor WhatsApp toko. */
 function checkoutToWhatsApp() {
   const entries = getCartEntries();
   if (!entries.length) return;
@@ -207,7 +210,7 @@ function checkoutToWhatsApp() {
   window.setTimeout(() => window.location.reload(), 3000);
 }
 
-/** Returns products matching the selected category, drink family, and search query. */
+/** Memilih produk sesuai kategori, jenis minuman, dan kata pencarian. */
 function getVisibleProducts() {
   const query = state.searchQuery.toLocaleLowerCase("id-ID");
   return catalogItems.filter((product) => {
@@ -218,7 +221,7 @@ function getVisibleProducts() {
   });
 }
 
-/** Creates semantic card markup for one catalog item. */
+/** Membuat struktur kartu yang bermakna untuk satu produk katalog. */
 function createProductCard(product, index) {
   const option = getProductOption(product);
   const sizeSelector = createSizeSelector(product, option.sizeKey);
@@ -249,7 +252,7 @@ function createProductCard(product, index) {
     </article>`;
 }
 
-/** Renders catalog cards from the current drink-family filter and search state. */
+/** Menampilkan kartu katalog sesuai filter dan kata pencarian aktif. */
 function renderProducts() {
   const products = getVisibleProducts();
   const familyName = state.activeProductFamily === "Milk & Tea Based" ? "Milk & Tea" : "Coffee";
@@ -259,7 +262,7 @@ function renderProducts() {
     : `<div class="empty-state"><strong>Menu belum ditemukan.</strong><p>Coba kata kunci lain atau pilih kategori berbeda.</p></div>`;
 }
 
-/** Updates only the visible card whose selection or cart quantity changed. */
+/** Memperbarui kartu produk yang ukuran atau jumlah keranjangnya berubah. */
 function updateProductCard(productId) {
   const card = [...elements.productGrid.querySelectorAll("[data-product-card]")]
     .find((item) => item.dataset.productCard === productId);
@@ -272,7 +275,7 @@ function updateProductCard(productId) {
   card.querySelector('[data-product-quantity][data-delta="-1"]').disabled = !cartEntry;
 }
 
-/** Switches the active drink family and refreshes only the catalog grid. */
+/** Mengganti jenis minuman aktif lalu menyegarkan katalog. */
 function setActiveProductFamily(family) {
   if (state.activeProductFamily === family) return;
   state.activeProductFamily = family;
@@ -284,19 +287,19 @@ function setActiveProductFamily(family) {
   renderProducts();
 }
 
-/** Handles Milk & Tea or Coffee filter selection. */
+/** Menangani pemilihan filter Milk & Tea atau Coffee. */
 function handleProductFamilyClick(event) {
   setActiveProductFamily(event.currentTarget.dataset.productFamily);
 }
 
-/** Filters the active catalog as the visitor types. */
+/** Memfilter katalog secara langsung saat pengunjung mengetik. */
 function handleSearchInput(event) {
   state.searchQuery = event.target.value.trim();
   renderProducts();
   if (state.searchQuery) document.querySelector("#catalog").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-/** Updates one drink card when its selected size changes. */
+/** Memperbarui kartu minuman setelah ukuran pilihan berubah. */
 function handleProductGridClick(event) {
   const quantityButton = event.target.closest("[data-product-quantity]");
   if (quantityButton) {
@@ -327,7 +330,7 @@ function handleProductGridClick(event) {
   });
 }
 
-/** Creates the markup for one customer review. */
+/** Membuat tampilan untuk satu ulasan pelanggan. */
 function createReviewMarkup(review) {
   return `
     <div class="review-photo interactive-image"><img src="${review.image}" alt="${review.name} bersama produk FD Drinks" /></div>
@@ -338,7 +341,7 @@ function createReviewMarkup(review) {
     </div>`;
 }
 
-/** Shows one review and updates its progress indicators. */
+/** Menampilkan ulasan terpilih dan memperbarui penanda posisinya. */
 function showReview(index) {
   const visibleReviews = getVisibleReviews();
   if (!visibleReviews.length) {
@@ -360,12 +363,12 @@ function showReview(index) {
   [...elements.reviewProgress.children].forEach((bar, barIndex) => bar.classList.toggle("active", barIndex === state.reviewIndex));
 }
 
-/** Returns reviews for the category currently shown in the catalog. */
+/** Mengambil ulasan sesuai kategori yang sedang ditampilkan. */
 function getVisibleReviews() {
   return reviews.filter((review) => review.category === state.activeCategory);
 }
 
-/** Refreshes the review heading, carousel, and controls for the selected category. */
+/** Menyegarkan judul, daftar ulasan, dan kontrol sesuai kategori aktif. */
 function renderReviewsForActiveCategory() {
   const categoryName = state.activeCategory === "drink" ? "Minuman" : "Kue";
   elements.reviewHeading.textContent = `Review ${categoryName} dari pelanggan kami.`;
@@ -375,7 +378,7 @@ function renderReviewsForActiveCategory() {
   restartReviewAutoplay();
 }
 
-/** Builds the review progress controls. */
+/** Membuat tombol penanda posisi untuk daftar ulasan. */
 function renderReviewProgress() {
   const visibleReviews = getVisibleReviews();
   const hasMultipleReviews = visibleReviews.length > 1;
@@ -387,34 +390,34 @@ function renderReviewProgress() {
     .join("");
 }
 
-/** Advances to the next customer review. */
+/** Berpindah ke ulasan pelanggan berikutnya. */
 function showNextReview() {
   if (getVisibleReviews().length < 2) return;
   showReview(state.reviewIndex + 1);
   restartReviewAutoplay();
 }
 
-/** Returns to the previous customer review. */
+/** Berpindah kembali ke ulasan pelanggan sebelumnya. */
 function showPreviousReview() {
   if (getVisibleReviews().length < 2) return;
   showReview(state.reviewIndex - 1);
   restartReviewAutoplay();
 }
 
-/** Starts automatic review rotation. */
+/** Memulai pergantian ulasan secara otomatis. */
 function startReviewAutoplay() {
   window.clearInterval(state.reviewTimer);
   if (getVisibleReviews().length < 2) return;
   state.reviewTimer = window.setInterval(() => showReview(state.reviewIndex + 1), 6200);
 }
 
-/** Restarts review autoplay after manual interaction. */
+/** Mengatur ulang jeda pergantian ulasan setelah interaksi manual. */
 function restartReviewAutoplay() {
   window.clearInterval(state.reviewTimer);
   startReviewAutoplay();
 }
   
-/** Handles direct review progress selection. */
+/** Menangani pemilihan ulasan melalui tombol penanda posisi. */
 function handleReviewProgressClick(event) {
   const button = event.target.closest("[data-review-index]");
   if (!button) return;
@@ -422,7 +425,7 @@ function handleReviewProgressClick(event) {
   restartReviewAutoplay();
 }
 
-/** Fades content sections in and out as they cross the viewport. */
+/** Menampilkan bagian halaman saat bagian tersebut masuk ke layar. */
 function setupRevealAnimations() {
   const observer = new IntersectionObserver(
     (entries) => {
@@ -433,20 +436,20 @@ function setupRevealAnimations() {
   document.querySelectorAll(".reveal").forEach((section) => observer.observe(section));
 }
 
-/** Toggles the compact navigation on small screens. */
+/** Membuka atau menutup navigasi pada layar kecil. */
 function toggleMobileMenu() {
   const isOpen = elements.navPanel.classList.toggle("is-open");
   elements.mobileMenuButton.setAttribute("aria-expanded", String(isOpen));
 }
 
-/** Closes the compact navigation after choosing a link. */
+/** Menutup navigasi kecil setelah pengunjung memilih tautan. */
 function closeMobileMenu(event) {
   if (!event.target.closest("a")) return;
   elements.navPanel.classList.remove("is-open");
   elements.mobileMenuButton.setAttribute("aria-expanded", "false");
 }
 
-/** Loads an optional local review video from configuration. */
+/** Memuat video ulasan lokal jika sumbernya tersedia di konfigurasi. */
 function setupVideoSource() {
   if (!siteConfig.videoSource) return;
   elements.reviewVideo.src = siteConfig.videoSource;
@@ -454,7 +457,7 @@ function setupVideoSource() {
   elements.videoPlaceholder.hidden = true;
 }
 
-/** Connects all page controls to their interactions. */
+/** Menghubungkan kontrol halaman dengan fungsi interaksinya. */
 function bindEvents() {
   elements.familyFilterButtons.forEach((button) => button.addEventListener("click", handleProductFamilyClick));
   elements.searchInput.addEventListener("input", handleSearchInput);
@@ -475,7 +478,7 @@ function bindEvents() {
   elements.navPanel.addEventListener("click", closeMobileMenu);
 }
 
-/** Initializes all dynamic content and page behavior. */
+/** Menyiapkan konten dinamis dan perilaku halaman saat halaman dimuat. */
 function initializeApp() {
   const pendingCheckoutUrl = sessionStorage.getItem(pendingCheckoutKey);
   if (pendingCheckoutUrl) {

@@ -4,7 +4,7 @@ Katalog web statis yang dilayani dengan server Node.js kecil.
 
 ## Menjalankan lokal
 
-Gunakan Node.js 20 atau lebih baru:
+Gunakan Node.js 24 LTS (versi stabil terbaru yang dipilih untuk proyek ini):
 
 ```sh
 npm install
@@ -12,6 +12,8 @@ npm run dev
 ```
 
 Buka `http://localhost:3000`.
+
+Versi runtime yang digunakan ditetapkan pada `.nvmrc`, `package.json`, dan `render.yaml` agar lingkungan lokal dan hosting tetap selaras. Kode menggunakan JavaScript modern berbasis modul ES, yang dijalankan langsung oleh Node.js 24 tanpa proses kompilasi tambahan.
 
 ## Hosting preview gratis di Render
 

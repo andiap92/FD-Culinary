@@ -23,7 +23,7 @@ const mimeTypes = {
   ".webm": "video/webm"
 };
 
-/** Resolves a request URL to an allowed static file path. */
+/** Mengubah URL permintaan menjadi lokasi berkas yang aman di dalam folder aset. */
 function resolveRequestPath(requestUrl = "/") {
   const pathname = decodeURIComponent(new URL(requestUrl, "http://localhost").pathname);
 
@@ -40,13 +40,13 @@ function resolveRequestPath(requestUrl = "/") {
   return isInsideRoot ? filePath : null;
 }
 
-/** Sends a small plain-text error response. */
+/** Mengirim respons kesalahan teks biasa dengan kode status yang sesuai. */
 function sendError(response, statusCode, message) {
   response.writeHead(statusCode, { "Content-Type": "text/plain; charset=utf-8" });
   response.end(message);
 }
 
-/** Serves one static asset while preventing path traversal. */
+/** Membaca dan mengirim aset statis serta menolak akses keluar dari folder aset. */
 async function handleRequest(request, response) {
   const filePath = resolveRequestPath(request.url);
 
@@ -69,7 +69,7 @@ async function handleRequest(request, response) {
   }
 }
 
-/** Reports the local development address after the server starts. */
+/** Menampilkan alamat server setelah proses mulai mendengarkan permintaan. */
 function handleListen() {
   console.log(`FD Culinary is listening on ${host}:${port}`);
 }
